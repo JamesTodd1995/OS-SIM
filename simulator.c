@@ -200,8 +200,14 @@ int startSim(struct Node *metaD,struct configStruct configData)
      //
      // step two put the selected pcb in runner state and run it
      //       in the running state this is where all of the magic happens
-     //       this is also where the we need to edit/add to our program.
+     //       this is also where the we need to edit/add to our program to finish sim04.  there are other places where code is needed but this is the main place.
+     //       there are two main funcitons for this step:  readProcess  and  startAction
      //       
+     //              readProcess takes in the selected PCB, and much much more, and reads the op commands from it.
+     //                once a an op command is ready to run then readProess calls startAction
+     //
+     //              startAction takes the needed infomation about an op command and deals with that command.
+     //                 here is where we need to add code for each section.
 
      
      while(processCounter != numberOfProcess)
