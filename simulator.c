@@ -316,7 +316,7 @@ int startSim(struct Node *metaD,struct configStruct configData)
 
      if(howToPrint == printTM || howToPrint == printB)
        {
-        printf("\nTime: %.6lf,OS: System end", time/CLOCKS_PER_SEC);
+        printf("\nTime: %.6lf, OS: System end", time/CLOCKS_PER_SEC);
        }
           //====this statement adds to the logNode memory info ================
           sprintf(printArray,"\nTime: %.6lf, OS: System end",time/CLOCKS_PER_SEC);
