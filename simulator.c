@@ -189,7 +189,19 @@ int startSim(struct Node *metaD,struct configStruct configData)
      // ==================================================================
 
 
-
+     // at this point all processes have been made and put in to pcb.
+     // all pcb are set to ready
+     // this while loop will run the processes.
+     //
+     // step one get an index for a pcb
+     //      this is based off of the scheduleing algorithem in the config file
+     //      once an index is found get that pcb ready for running
+     //          NOTE  this is where we might want to have the OS wait if all processes are in blocked state.
+     //
+     // step two put the selected pcb in runner state and run it
+     //       in the running state this is where all of the magic happens
+     //       this is also where the we need to edit/add to our program.
+     //       
 
      
      while(processCounter != numberOfProcess)
@@ -197,7 +209,9 @@ int startSim(struct Node *metaD,struct configStruct configData)
           // take a process and set it to running
           // then Run that process
           startTime = clock();
+           
 
+          //     ================   Step one  ====================
           // here i will be picking a process to run with regard to the
           // shecduling algorithm i nthe config file.
           index = pickProcess(processes,configData, numberOfProcess);
@@ -224,9 +238,11 @@ int startSim(struct Node *metaD,struct configStruct configData)
           // ==================================================================
 
 
+          // ================ End of Step one =================================
 
 
-
+          // ====================== start of Step 2 ===========================
+  
 
           strcpy(processes[index].state, "running"); 
           endTime = clock();
@@ -261,6 +277,9 @@ int startSim(struct Node *metaD,struct configStruct configData)
           // set the finished process to an exit state
           startTime = clock();
 
+          // ========================  End of step 2 ==========================
+
+          // ========================  Start of Step 3 ========================
 
           if(processes[index].time > 0)
           {
@@ -286,17 +305,9 @@ int startSim(struct Node *metaD,struct configStruct configData)
                }
           }
 
-
-
-
           endTime = clock();
 
           time+= (endTime - startTime);
-
-
-
-
-
 
           //====this statement adds to the logNode memory info ================
           sprintf(printArray,"\nTime: %.6lf, OS: Process %d, set in Exit State",time/CLOCKS_PER_SEC,index);
@@ -307,7 +318,7 @@ int startSim(struct Node *metaD,struct configStruct configData)
           clean(printingLine,printArraySize);
           // ==================================================================
 
-         
+          // =================== End of Step 3 ================================
           startTime = clock();
        }
      endTime = clock();
