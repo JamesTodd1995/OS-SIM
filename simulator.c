@@ -909,3 +909,18 @@ int getSJFN(struct pcb array[], int size)
 
 
 
+
+
+
+
+
+
+// openmp ,, mpi
+
+
+
+
+
+
+
+
