@@ -1,0 +1,28 @@
+Time: 0.000000, OS: System start
+Time: 0.000002, OS: Begin PCB Creation
+Time: 0.000005, OS: All processes now set in New state
+Time: 0.000005, OS: All processes now set in Ready state
+Time: 0.000006, OS: FCFS-N picked process 0 with time 4100 (mSec)
+Time: 0.000015, OS: Process 0,  set in Running State
+Time: 0.000015, Process 0, hard drive output start
+Time: 0.540015, Process 0, hard drive output end
+Time: 0.540016, Process 0, printer output start
+Time: 1.540016, Process 0, printer output end
+Time: 1.540016, Process 0,  Run operation start
+Time: 1.820016, Process 0, Run operation end
+Time: 1.820017, Process 0,  Run operation start
+Time: 2.000017, Process 0, Run operation end
+Time: 2.000018, Process 0, hard drive intput start
+Time: 2.300018, Process 0, hard drive intput end
+Time: 2.300018, Process 0,  Run operation start
+Time: 2.580018, Process 0, Run operation end
+Time: 2.580019, Process 0, printer output start
+Time: 3.580019, Process 0, printer output end
+Time: 3.580019, Process 0, hard drive output start
+Time: 4.000019, Process 0, hard drive output end
+Time: 4.000020, Process 0, hard drive intput start
+Time: 4.420020, Process 0, hard drive intput end
+Time: 4.420020, Process 0,  Run operation start
+Time: 4.520020, Process 0, Run operation end
+Time: 4.520020, OS: Process 0, set in Exit State
+Time: 4.520020, OS: System end
