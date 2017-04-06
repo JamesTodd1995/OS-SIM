@@ -1,4 +1,5 @@
 # this is the git ignore file
+sim04
 *.o
 *.exe
 *.lgf
