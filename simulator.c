@@ -903,7 +903,7 @@ int getFCFSN(struct pcb array[], int size)
      {
       if((strcmp((array[count].state), "exit")) != 0 &&
           (strcmp((array[count].state), "block")) != 0 &&
-           count != lastIndex)
+           count > lastIndex)
       {
         if((count+1) == size)
         {
