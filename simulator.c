@@ -889,11 +889,14 @@ int pickProcess(struct pcb array[], struct configStruct configData, int size)
 int getFCFSN(struct pcb array[], int size)
   {
    int count = 0;
-
+   static int lastIndex = -1;
    for(count = 0; count < size; count++)
      {
-      if((strcmp((array[count].state), "exit")) != 0)
+      if((strcmp((array[count].state), "exit")) != 0 ||
+          (strcmp((array[count].state), "exit")) != 0 ||
+           count < lastIndex)
       {
+        lastIndex = count%(size -1);
         return count;
       }
      }
