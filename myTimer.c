@@ -47,7 +47,7 @@ void *myTWait ( void *myvar)
 
         currentTime = clock();
      }
-  
+  threadHandler(data);
    
    return NULL;
   }

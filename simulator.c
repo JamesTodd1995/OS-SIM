@@ -41,7 +41,7 @@ int startSim(struct Node *metaD,struct configStruct configData)
      char numberArray[12];
      int numberArraySize = 12;
      int printingLineSize = 80;
-     int howToPrint = 0;
+     int howToPrint = 0, test = 0;
      int numberOfProcess = 0, processCounter = 0, tester = 0, index = 0;
      char printArray[80];
      int printArraySize = 80;
@@ -276,9 +276,16 @@ int startSim(struct Node *metaD,struct configStruct configData)
 
 
           // read the process now. aka running
-          readProcess(&(processes[index].first),configData , &time, index,howToPrint,
-                        numberArraySize,printingLine,numberArray,&currentLN,
-                        &(processes[index].time), waitPrt);
+          test = readProcess(&(processes[index].first),configData , &time, index,
+                             howToPrint, numberArraySize,printingLine,numberArray,
+                             &currentLN, &(processes[index].time), waitPrt);
+          if(test == setToBlocked)
+            {
+              clean(processes[index].state, 7);
+              strcpy(processes[index].state, "block");
+              printf("\n\n process %d is now blocked", index);
+              test = 0;
+            }
 
           // set the finished process to an exit state
           startTime = clock();
@@ -287,10 +294,12 @@ int startSim(struct Node *metaD,struct configStruct configData)
 
           // ========================  Start of Step 3 ========================
 
-          if(processes[index].time > 0)
+          if(processes[index].time > 0 && 
+                            (strcmp((processes[index].state), "block")) != 0)
           {
              clean(processes[index].state, 7);
              strcpy(processes[index].state, "ready"); 
+   printf("\n\n\n am i here!?");
 
              if(howToPrint == printTM || howToPrint == printB)
                {
@@ -298,7 +307,7 @@ int startSim(struct Node *metaD,struct configStruct configData)
                  printf("set in Ready State"); 
                }
           }
-          else
+          else if((strcmp((processes[index].state), "block")) != 0)
           {  
              processCounter++;
              clean(processes[index].state, 7);
@@ -682,13 +691,15 @@ struct configStruct configData, int *pcbTime, struct forThread *arrayPrt
          threadData->processWaitTime = threadTime;
          clean(threadData->printLine,80);
          strcpy(threadData->printLine,printingLine);
-         threadData->waitPrt = arrayPrt;         
+         threadData->waitPrt = arrayPrt;  
+         threadData->howToPrint = printType;       
 
 
          clean(printingLine,printArraySize);
          pthread_create(&thread, &attr, myTWait,(void *)threadData);
-         pthread_join(thread,NULL);
-         *pcbTime -= threadTime/1000;
+         //pthread_join(thread,NULL);
+         //*pcbTime -= threadTime/1000;
+         return setToBlocked;
        }
      // if the component Letter is a I, input, do this
      if(comL =='I')
@@ -736,7 +747,8 @@ struct configStruct configData, int *pcbTime, struct forThread *arrayPrt
         threadData->processWaitTime = threadTime;
         clean(threadData->printLine,80);
         strcpy(threadData->printLine,printingLine);
-        threadData->waitPrt = arrayPrt;  
+        threadData->waitPrt = arrayPrt;
+        threadData->howToPrint = printType;
 
         pthread_create(&thread, &attr, myTWait,(void *)threadData);
         pthread_join(thread,NULL);
@@ -889,7 +901,16 @@ int pickProcess(struct pcb array[], struct configStruct configData, int size)
             index = getFCFSP(array,size);
             break;
      }
-
+    
+    if(index == allBlocked)
+      {
+        while(index == allBlocked)
+          {
+            printf("\n all processes are blocked");
+            myWait(1000000);
+          }
+        pickProcess(array,configData,size);
+      }
     return index;
   }
   
@@ -916,7 +937,7 @@ int getFCFSN(struct pcb array[], int size)
         return count;
       }
      }
-   return 0;
+   return allBlocked;
   }
 
 int getFCFSP(struct pcb array[], int size)
@@ -932,7 +953,7 @@ int getFCFSP(struct pcb array[], int size)
             return count;
           }
        }
-     return 0;
+     return allBlocked;
   }
 
 // this method returns the index of the process with SJF-N in mind.
@@ -944,7 +965,8 @@ int getSJFN(struct pcb array[], int size)
    
    for(count = 0; count < size; count++)
      {
-      if((strcmp((array[count].state), "exit")) != 0)
+      if((strcmp((array[count].state), "exit")) != 0 &&
+          (strcmp((array[count].state), "block")) != 0)
       {
         if(array[count].time < min)
         {
@@ -953,11 +975,30 @@ int getSJFN(struct pcb array[], int size)
         }
       }
      }
-
- 
-   return index;
+   return allBlocked;
   }
 
+
+void threadHandler (struct forThread *data)
+  {
+   static int lock  = isUnlock;
+  
+   if(lock == isLock)
+     {
+      while(lock == isLock);
+     }
+
+     lock = isLock;
+
+     printf("\n\nthread with process %d saved in wait\n\n", data->processID);
+     
+     data->waitPrt[data->processID] = *data;
+     
+     lock = isUnlock;
+  }
+     
+     
+     
 
 
 

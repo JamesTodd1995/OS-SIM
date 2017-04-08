@@ -26,11 +26,14 @@ struct forThread
      char printLine[80];
      int processID;
      int processWaitTime;
+     int howToPrint;
      struct forThread *waitPrt;
    };
 
 
-enum massage_codes { unk = -1000, printTM, printTL, printB, qtTimedOut, commandEnded, setToBlocked};
+enum massage_codes { unk = -1000, printTM, printTL, printB, qtTimedOut,
+                     commandEnded, setToBlocked, isLock, isUnlock, allBlocked,
+                     notAllBlocked};
 
 
 
@@ -64,5 +67,6 @@ void writeToLog (struct logNode *first,struct configStruct configData);
 int getFCFSN(struct pcb array[], int size);
 int getSJFN(struct pcb array[], int size);
 int getFCFSP(struct pcb array[], int size);
+void threadHandler(struct forThread *data);
 #endif
 
