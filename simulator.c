@@ -561,12 +561,16 @@ int *pcbTime, struct forThread *arrayPrt
 
              return qtTimedOut;
           }
-//          else
-//          {
-          *current = (*current)->nextNode;
-  //           **first = **current;
-//             return commandEnded;
-//          }
+          else if(test == setToBlocked)
+          {
+             *current = (*current)->nextNode;
+             **first = **current;
+             return setToBlocked;
+          }
+          else
+          {
+             *current = (*current)->nextNode;
+          }
           // move the pointer
           
           

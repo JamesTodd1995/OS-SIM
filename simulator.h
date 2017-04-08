@@ -30,7 +30,7 @@ struct forThread
    };
 
 
-enum massage_codes { unk = -1000, printTM, printTL, printB, qtTimedOut, commandEnded};
+enum massage_codes { unk = -1000, printTM, printTL, printB, qtTimedOut, commandEnded, setToBlocked};
 
 
 
