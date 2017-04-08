@@ -33,7 +33,7 @@ struct forThread
 
 enum massage_codes { unk = -1000, printTM, printTL, printB, qtTimedOut,
                      commandEnded, setToBlocked, isLock, isUnlock, allBlocked,
-                     notAllBlocked};
+                     notAllBlocked, NULL_PROCESS_ID};
 
 
 
@@ -60,7 +60,7 @@ struct configStruct configData, int *pcbTime, struct forThread *arrayPrt
 );
 
 
-int pickProcess(struct pcb array[], struct configStruct configData, int size);
+int pickProcess(struct pcb array[], struct configStruct configData, int size, struct forThread *data);
 struct logNode *addLogNode(struct logNode *current);
 void writeToLog (struct logNode *first,struct configStruct configData);
 
@@ -68,5 +68,8 @@ int getFCFSN(struct pcb array[], int size);
 int getSJFN(struct pcb array[], int size);
 int getFCFSP(struct pcb array[], int size);
 void threadHandler(struct forThread *data);
+void setToNull(struct forThread *data, int size);
+int countWaitQueue(struct forThread *data, int size);
+
 #endif
 

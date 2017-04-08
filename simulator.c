@@ -140,6 +140,7 @@ int startSim(struct Node *metaD,struct configStruct configData)
      // method and fill it with data.
      struct pcb *arrayPrt = &processes[0];
      struct forThread *waitPrt = &waitQueue[0];
+     setToNull(waitPrt, numberOfProcess);
 
      
      // get process and set it to new
@@ -220,7 +221,7 @@ int startSim(struct Node *metaD,struct configStruct configData)
           //     ================   Step one  ====================
           // here i will be picking a process to run with regard to the
           // shecduling algorithm i nthe config file.
-          index = pickProcess(processes,configData, numberOfProcess);
+          index = pickProcess(processes,configData, numberOfProcess, waitPrt);
 
 
           clean(processes[index].state, 7);
@@ -783,9 +784,6 @@ struct configStruct configData, int *pcbTime, struct forThread *arrayPrt
 
 
 
-
-
-
   
          *time += ((*cyT)*proT);
 
@@ -821,12 +819,6 @@ struct configStruct configData, int *pcbTime, struct forThread *arrayPrt
             printf("\nTime: %.6lf, Process %d, ",*time/CLOCKS_PER_SEC,count);
             printf("Run operation end");
            }
-
-
-
-
-
-
 
 
 
@@ -872,10 +864,11 @@ void writeToLog (struct logNode *first, struct configStruct configData)
 // how this works is I check to see what algorithem is in config file
 // then i will pass my pcb array in the right function to get the index of the next process
 // all scheduling algorithems ignore PCB in exit state.S
-int pickProcess(struct pcb array[], struct configStruct configData, int size)
+int pickProcess(struct pcb array[], struct configStruct configData, int size, struct forThread *data)
   {
    int scheduling = 0, fcfsn = 1000, sjfn = 2000, fcfsp = 3000;
-   int index = 0;  
+   int index = 0, test; 
+  
    if((strcmp(configData.cpuSchedulingCodeData, "FCFS-N")) == 0) 
      {   
        scheduling = fcfsn;
@@ -907,9 +900,11 @@ int pickProcess(struct pcb array[], struct configStruct configData, int size)
         while(index == allBlocked)
           {
             printf("\n all processes are blocked");
+            test = countWaitQueue(data,size);
             myWait(1000000);
           }
-        pickProcess(array,configData,size);
+        
+        pickProcess(array,configData,size,data);
       }
     return index;
   }
@@ -997,8 +992,44 @@ void threadHandler (struct forThread *data)
      lock = isUnlock;
   }
      
-     
-     
+void setToNull(struct forThread *data, int size)
+  {
+    int count = 0;
+    for(count = 0; count < size; count++)
+      {
+        struct forThread dummieData;
+        dummieData.processID = NULL_PROCESS_ID;
+        data[count] = dummieData;
+      }
+  }
+
+
+int getNextIndexInWaitQueue(struct forThread *data, int size)
+   {
+    int index = 0, count = -1;
+    for(index = 0; index < size; index++)
+      {
+        if(data[index].processID == NULL_PROCESS_ID &&
+            count == -1)
+          {
+             count = index;
+          }
+      }
+    return count;
+   }
+// get the index of a process in the waiting queue,, this is might not needed
+int countWaitQueue(struct forThread *data, int size)
+  {
+    int index = 0, count;
+    for(index = 0; index < size; index++)
+      {
+        if(data[index].processID != NULL_PROCESS_ID)
+          {
+             count = index;
+          }
+      }
+    return count;
+  }
 
 
 
