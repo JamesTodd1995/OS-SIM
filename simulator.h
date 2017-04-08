@@ -63,5 +63,6 @@ void writeToLog (struct logNode *first,struct configStruct configData);
 
 int getFCFSN(struct pcb array[], int size);
 int getSJFN(struct pcb array[], int size);
+int getFCFSP(struct pcb array[], int size);
 #endif
 

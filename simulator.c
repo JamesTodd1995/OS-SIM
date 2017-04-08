@@ -309,21 +309,23 @@ int startSim(struct Node *metaD,struct configStruct configData)
                   printf("\nTime: %.6lf, OS: processes %d ", time/CLOCKS_PER_SEC, index);
                   printf("set in Exit State"); 
                }
+             endTime = clock();
+
+             time+= (endTime - startTime);
+
+             //====this statement adds to the logNode memory info ================
+             sprintf(printArray,"\nTime: %.6lf, OS: Process %d, set in Exit State",time/CLOCKS_PER_SEC,index);
+             strcat(printingLine, printArray);
+             clean(printArray,printArraySize);
+             strcpy(currentLN->data,printingLine);
+             currentLN = addLogNode(currentLN);
+             clean(printingLine,printArraySize);
+             // ==================================================================
+
           }
 
-          endTime = clock();
 
-          time+= (endTime - startTime);
-
-          //====this statement adds to the logNode memory info ================
-          sprintf(printArray,"\nTime: %.6lf, OS: Process %d, set in Exit State",time/CLOCKS_PER_SEC,index);
-          strcat(printingLine, printArray);
-          clean(printArray,printArraySize);
-          strcpy(currentLN->data,printingLine);
-          currentLN = addLogNode(currentLN);
-          clean(printingLine,printArraySize);
-          // ==================================================================
-
+          
           // =================== End of Step 3 ================================
           startTime = clock();
        }
@@ -860,7 +862,7 @@ void writeToLog (struct logNode *first, struct configStruct configData)
 // all scheduling algorithems ignore PCB in exit state.S
 int pickProcess(struct pcb array[], struct configStruct configData, int size)
   {
-   int scheduling = 0, fcfsn = 1000, sjfn = 2000;
+   int scheduling = 0, fcfsn = 1000, sjfn = 2000, fcfsp = 3000;
    int index = 0;  
    if((strcmp(configData.cpuSchedulingCodeData, "FCFS-N")) == 0) 
      {   
@@ -869,6 +871,10 @@ int pickProcess(struct pcb array[], struct configStruct configData, int size)
    if((strcmp(configData.cpuSchedulingCodeData, "SJF-N")) == 0) 
      {   
        scheduling = sjfn;
+     }
+   if((strcmp(configData.cpuSchedulingCodeData, "FCFS-P")) == 0) 
+     {   
+       scheduling = fcfsp;
      }
 
    switch(scheduling)
@@ -879,31 +885,57 @@ int pickProcess(struct pcb array[], struct configStruct configData, int size)
        case (2000) :
             index = getSJFN(array,size);
             break;
+       case (3000) :
+            index = getFCFSP(array,size);
+            break;
      }
 
     return index;
   }
   
 
-// this method returns the index of the process with FCFS in mind
+// this method returns the index of the process with FCFS-N in mind
 int getFCFSN(struct pcb array[], int size)
   {
    int count = 0;
    static int lastIndex = -1;
    for(count = 0; count < size; count++)
      {
-      if((strcmp((array[count].state), "exit")) != 0 ||
-          (strcmp((array[count].state), "exit")) != 0 ||
-           count < lastIndex)
+      if((strcmp((array[count].state), "exit")) != 0 &&
+          (strcmp((array[count].state), "block")) != 0 &&
+           count != lastIndex)
       {
-        lastIndex = count%(size -1);
+        if((count+1) == size)
+        {
+          lastIndex = -1;
+        }
+        else
+        {
+          lastIndex = count;
+        }
         return count;
       }
      }
    return 0;
   }
 
-// this method returns the index of the process with SJF in mind.
+int getFCFSP(struct pcb array[], int size)
+  {
+     int count = 0;
+  
+     for(count = 0; count < size; count++)
+       {
+        if((strcmp((array[count].state), "exit")) != 0 &&
+            (strcmp((array[count].state), "block")) != 0)
+          {
+
+            return count;
+          }
+       }
+     return 0;
+  }
+
+// this method returns the index of the process with SJF-N in mind.
 int getSJFN(struct pcb array[], int size)
   {
    // the min time is unknow, so i picked 5,000,000 to be the stating min
