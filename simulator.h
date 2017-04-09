@@ -49,7 +49,7 @@ int readProcess
 (
 struct Node **first,struct configStruct configData, double *time, int count,int printType,
 int numberArraySize, char *printingLine, char *numberArray, struct logNode **currentLN,
-int *pcbTime, struct forThread *arrayPrt, int numOfProcess
+int *pcbTime, struct forThread *arrayPrt, int numOfProcess, struct pcb *pcbArray
 );
 
 int startAction
@@ -69,6 +69,7 @@ struct forThread *data
 struct logNode *addLogNode(struct logNode *current);
 void writeToLog (struct logNode *first,struct configStruct configData);
 
+int getNextIndexInWaitQueue(struct forThread *data, int size);
 int getFCFSN(struct pcb array[], int size);
 int getSJFN(struct pcb array[], int size);
 int getFCFSP(struct pcb array[], int size);
@@ -77,7 +78,6 @@ void setToNull(struct forThread *data, int size);
 int countWaitQueue(struct forThread *data, int size);
 void unblockProcess(struct pcb array[], int index, int subTime);
 void setIndexToNull (struct forThread *data, int index);
-void setIndexToReady (struct pcb *process, int index);
 
 #endif
 

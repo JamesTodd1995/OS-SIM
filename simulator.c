@@ -279,12 +279,13 @@ int startSim(struct Node *metaD,struct configStruct configData)
           // read the process now. aka running
           test = readProcess(&(processes[index].first),configData , &time, index,
                              howToPrint, numberArraySize,printingLine,numberArray,
-                             &currentLN, &(processes[index].time), waitPrt,numberOfProcess);
+                             &currentLN, &(processes[index].time), waitPrt,
+                             numberOfProcess, arrayPrt);
           if(test == setToBlocked)
             {
               clean(processes[index].state, 7);
               strcpy(processes[index].state, "block");
-              printf("\n\n process %d is now blocked", index);
+              printf("\nprocess %d is now blocked", index);
               test = 0;
             }
 
@@ -338,6 +339,7 @@ int startSim(struct Node *metaD,struct configStruct configData)
           
           // =================== End of Step 3 ================================
           startTime = clock();
+
        }
      endTime = clock();
      time+= (endTime - startTime);
@@ -537,7 +539,7 @@ int readProcess
 (
 struct Node **first,struct configStruct configData, double *time, int count,int printType,
 int numberArraySize, char *printingLine, char *numberArray, struct logNode **currentLN,
-int *pcbTime, struct forThread *arrayPrt, int numOfProcess
+int *pcbTime, struct forThread *arrayPrt, int numOfProcess, struct pcb *pcbArray
 )
   {
      // set up needed variables
@@ -545,7 +547,7 @@ int *pcbTime, struct forThread *arrayPrt, int numOfProcess
      char comL, opStr[12];
      int  cyT = 0, proT = configData.processorCycleTimeData;
      int  iOT = configData.ioCycleTimeData;
-     int test, processesWaiting;
+     int test, processesWaiting, loopCount = 0;
      
      // proTime and iOTime are in msec, converting to microseconds
      // this is because on how I have my program wait.
@@ -554,7 +556,7 @@ int *pcbTime, struct forThread *arrayPrt, int numOfProcess
      iOT = iOT*1000;
      
      // read though the process data a deal with a specific part of the process.
-     while((*current)->nextNode != NULL)
+     while(*current != NULL)
        {
           // get the data of the process
           comL= (*current)->componentLetter;
@@ -582,12 +584,15 @@ int *pcbTime, struct forThread *arrayPrt, int numOfProcess
           else if( test == waitQueueSignal)
           {
              processesWaiting = countWaitQueue(arrayPrt, numOfProcess);
+             for(loopCount = 0; loopCount < processesWaiting; loopCount++)
+               { 
+                 unblockProcess(pcbArray, getNextIndexInWaitQueue(arrayPrt,numOfProcess), 0);
+                 setIndexToNull (arrayPrt, getNextIndexInWaitQueue(arrayPrt,numOfProcess));
+               }
+             **first = **current;
+             ((*current)->cycleTime) = cyT;
 
-
-
-          //   *current = (*current)->nextNode;
-          //   **first = **current;
-          //   return setToBlocked;
+             return qtTimedOut;
           }
           else
           {
@@ -773,7 +778,7 @@ int numOfProcess
      // if the component Letter is a P, process, do this
      if(comL =='P')
        {
-         int loopCount = 0, count = 0;
+         int loopCount = 0, counter = 0;
          endTime = clock();
          *time += (endTime - startTime);
 
@@ -820,30 +825,31 @@ qtime/config.processCT
 
 30/10 = 3
 
-
+i dont think this works right
 a cycle is 
 */
          loopCount = configData.quantumTimeData/configData.processorCycleTimeData;
  
-         for(count = 0; count < loopCount; count++)
+         for(counter = 0; counter < loopCount; counter++)
            {
+
              // do the wait a cycle
              myWait(configData.processorCycleTimeData*1000);
              // update the time, P(run) 7 to 6
              *cyT = *cyT - 1;
-             *pcbTime -= configData.processorCycleTimeData;
+             *pcbTime = *pcbTime - configData.processorCycleTimeData;
              *time += configData.processorCycleTimeData;
              // do the check
              test = countWaitQueue(arrayPrt, numOfProcess);
              // if true, leave with updating data
-             if(test != 0)
+             if(test < 0)
                { 
                  test = 0;
                  if(printType == printTM || printType == printB)
                   {  
                    printf("\nTime: %.6lf, Process %d, ",*time/CLOCKS_PER_SEC,count);
                    printf("Run operation end");
-                   printf("\n\n (%d)  (%d) (%d) \n\n",loopCount,*cyT,count);
+                   printf("\n\n (%d)  (%d) (%d) \n\n",loopCount,*cyT,counter);
                   }
                  //====this statement adds to the logNode memory info ================
                  sprintf(printArray,"\nTime: %.6lf, Process %d, Run operation end",*time/            CLOCKS_PER_SEC,count);
@@ -856,11 +862,31 @@ a cycle is
                
                  return waitQueueSignal;
                }
-             
              // false, continue.
            }
 
+          if(*cyT > 0)
+            {
 
+         if(printType == printTM || printType == printB)
+           {  
+            printf("\nTime: %.6lf, Process %d, ",*time/CLOCKS_PER_SEC,count);
+            printf("Run operation end");
+           }
+
+
+
+
+          //====this statement adds to the logNode memory info ================
+          sprintf(printArray,"\nTime: %.6lf, Process %d, Run operation end",*time/CLOCKS_PER_SEC,count);
+          strcat(printingLine, printArray);
+          clean(printArray,printArraySize);
+          strcpy((*currentLN)->data,printingLine);
+          *currentLN = addLogNode(*currentLN);
+          clean(printingLine,printArraySize);
+          // ==================================================================
+              return qtTimedOut;
+            } 
 
 
 /*
@@ -947,7 +973,8 @@ struct forThread *data
 )
   {
    int scheduling = 0, fcfsn = 1000, sjfn = 2000, fcfsp = 3000;
-   int index = 0, test, subTime = 0; 
+   int index = 0, test, subTime = 0, loopCounter = 0;
+   int processIndex = 0;
   
    if((strcmp(configData.cpuSchedulingCodeData, "FCFS-N")) == 0) 
      {   
@@ -979,13 +1006,26 @@ struct forThread *data
       {
         while(index == allBlocked)
           {
+//            myWait(1000000);
             printf("\n all processes are blocked");
-            myWait(1000000);
+/*             processesWaiting = countWaitQueue(arrayPrt, numOfProcess);
+             for(loopCount = 0; loopCount < processesWaiting; loopCount++)
+               { 
+                 unblockProcess(pcbArray, getNextIndexInWaitQueue(arrayPrt,numOfProcess), 0);
+                 setIndexToNull (arrayPrt, getNextIndexInWaitQueue(arrayPrt,numOfProcess));
+               }*/
+           myWait(1000000);
             test = countWaitQueue(data,size);
             if(test != -1)
-              { 
-                subTime = data[test].processWaitTime/1000;
-                unblockProcess(array,test,subTime);
+              {
+               for(loopCounter = 0; loopCounter < test; loopCounter++)
+                {
+
+                 processIndex =getNextIndexInWaitQueue(data,size);
+                 subTime = data[processIndex].processWaitTime/1000;
+                 unblockProcess(array,processIndex,subTime);
+                 setIndexToNull(data,processIndex);
+                }
                 index = 0;
               }
           }
@@ -1071,8 +1111,6 @@ void threadHandler (struct forThread *data)
 
      lock = isLock;
 
-     printf("\n\nthread with process %d saved in wait\n\n", data->processID);
-     
      data->waitPrt[data->processID] = *data;
      
      lock = isUnlock;
@@ -1092,13 +1130,12 @@ void setToNull(struct forThread *data, int size)
 
 int getNextIndexInWaitQueue(struct forThread *data, int size)
    {
-    int index = 0, count = -1;
+    int index = 0, count = 0;
     for(index = 0; index < size; index++)
       {
-        if(data[index].processID == NULL_PROCESS_ID &&
-            count == -1)
+        if(data[index].processID != NULL_PROCESS_ID)
           {
-             count = index;
+             return index;
           }
       }
     return count;
@@ -1111,7 +1148,7 @@ int countWaitQueue(struct forThread *data, int size)
       {
         if(data[index].processID != NULL_PROCESS_ID)
           {
-             count = index;
+             count++;
           }
       }
     return count;
@@ -1121,11 +1158,12 @@ int countWaitQueue(struct forThread *data, int size)
 
 void unblockProcess(struct pcb array[], int index, int subTime)
   {
-    printf("\n\n Process (%d) is set to ready",index);
-    clean(array[index].state, 7);
-    strcpy(array[index].state, "ready");
+ 
+        printf("\n\n Process %d is set to ready",array[index].processNum);
+        clean(array[index].state, 7);
+        strcpy(array[index].state, "ready");
     array[index].time -= subTime; 
-    // need to reset the process in the wait queue to null
+   
   }
 
 void setIndexToNull (struct forThread *data, int index)
@@ -1134,8 +1172,6 @@ void setIndexToNull (struct forThread *data, int index)
      dummieData.processID = NULL_PROCESS_ID;
      data[index] = dummieData;
   }
-
-
 
 
 

@@ -41,7 +41,6 @@ void *myTWait ( void *myvar)
    clock_t currentTime = clock();
    clock_t goalTime = clock();
 
-   printf("\n\n (%d) (%s) \n\n",tester++, data->printLine);
    while(currentTime <= (goalTime + target))
      {
 
