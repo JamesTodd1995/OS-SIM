@@ -1032,7 +1032,7 @@ int getSJFN(struct pcb array[], int size)
   }
 
 // this method returns the index of the process with respect to RR-P order
-int getRRP(Struct pcb array[], int size)
+int getRRP(struct pcb array[], int size)
   {
      int count = 0;
      static int lastIndex = -1;
