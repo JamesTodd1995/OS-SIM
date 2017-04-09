@@ -33,7 +33,7 @@ struct forThread
 
 enum massage_codes { unk = -1000, printTM, printTL, printB, qtTimedOut,
                      commandEnded, setToBlocked, isLock, isUnlock, allBlocked,
-                     notAllBlocked, NULL_PROCESS_ID};
+                     notAllBlocked, NULL_PROCESS_ID, waitQueueSignal};
 
 
 
@@ -49,14 +49,15 @@ int readProcess
 (
 struct Node **first,struct configStruct configData, double *time, int count,int printType,
 int numberArraySize, char *printingLine, char *numberArray, struct logNode **currentLN,
-int *pcbTime, struct forThread *arrayPrt 
+int *pcbTime, struct forThread *arrayPrt, int numOfProcess
 );
 
 int startAction
 (
 char comL,char *opStr,int *cyT,int proT,int iOT,double *time,int count,int printType,
 int numberArraySize, char *printingLine, char *numberArray, struct logNode **currentLN,
-struct configStruct configData, int *pcbTime, struct forThread *arrayPrt
+struct configStruct configData, int *pcbTime, struct forThread *arrayPrt,
+int numOfProcess
 );
 
 
@@ -75,6 +76,8 @@ void threadHandler(struct forThread *data);
 void setToNull(struct forThread *data, int size);
 int countWaitQueue(struct forThread *data, int size);
 void unblockProcess(struct pcb array[], int index, int subTime);
+void setIndexToNull (struct forThread *data, int index);
+void setIndexToReady (struct pcb *process, int index);
 
 #endif
 

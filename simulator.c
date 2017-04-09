@@ -231,12 +231,12 @@ int startSim(struct Node *metaD,struct configStruct configData)
           startTime = clock();
           if(howToPrint == printTM || howToPrint == printB)
             {
-             printf("\nTime: %.6lf, OS: %s ",time/CLOCKS_PER_SEC,configData.cpuSchedulingCodeData);
+             printf("\n\nTime: %.6lf, OS: %s ",time/CLOCKS_PER_SEC,configData.cpuSchedulingCodeData);
              printf("picked process %d",index);
              printf(" with time %d (mSec)",processes[index].time);
             }
           //====this statement adds to the logNode memory info ================
-          sprintf(printArray,"\nTime: %.6lf, OS: %s picked process %d with time %d (mSec)",time/CLOCKS_PER_SEC,configData.cpuSchedulingCodeData,index,processes[index].time);
+          sprintf(printArray,"\n\nTime: %.6lf, OS: %s picked process %d with time %d (mSec)",time/CLOCKS_PER_SEC,configData.cpuSchedulingCodeData,index,processes[index].time);
           strcat(printingLine, printArray);
           clean(printArray,printArraySize);
           strcpy(currentLN->data,printingLine);
@@ -258,12 +258,12 @@ int startSim(struct Node *metaD,struct configStruct configData)
 
           if(howToPrint == printTM || howToPrint == printB)
             {
-             printf("\n\nTime: %.6lf, OS: processes %d ", time/CLOCKS_PER_SEC, index);
+             printf("\nTime: %.6lf, OS: processes %d ", time/CLOCKS_PER_SEC, index);
              printf("set in Running State");
             }
 
           //====this statement adds to the logNode memory info ================
-          sprintf(printArray,"\n\nTime: %.6lf, OS: Process %d,  set in Running State",time/CLOCKS_PER_SEC,index);
+          sprintf(printArray,"\nTime: %.6lf, OS: Process %d,  set in Running State",time/CLOCKS_PER_SEC,index);
           strcat(printingLine, printArray);
           clean(printArray,printArraySize);
           strcpy(currentLN->data,printingLine);
@@ -279,7 +279,7 @@ int startSim(struct Node *metaD,struct configStruct configData)
           // read the process now. aka running
           test = readProcess(&(processes[index].first),configData , &time, index,
                              howToPrint, numberArraySize,printingLine,numberArray,
-                             &currentLN, &(processes[index].time), waitPrt);
+                             &currentLN, &(processes[index].time), waitPrt,numberOfProcess);
           if(test == setToBlocked)
             {
               clean(processes[index].state, 7);
@@ -537,7 +537,7 @@ int readProcess
 (
 struct Node **first,struct configStruct configData, double *time, int count,int printType,
 int numberArraySize, char *printingLine, char *numberArray, struct logNode **currentLN,
-int *pcbTime, struct forThread *arrayPrt
+int *pcbTime, struct forThread *arrayPrt, int numOfProcess
 )
   {
      // set up needed variables
@@ -545,7 +545,7 @@ int *pcbTime, struct forThread *arrayPrt
      char comL, opStr[12];
      int  cyT = 0, proT = configData.processorCycleTimeData;
      int  iOT = configData.ioCycleTimeData;
-     int test;
+     int test, processesWaiting;
      
      // proTime and iOTime are in msec, converting to microseconds
      // this is because on how I have my program wait.
@@ -562,9 +562,9 @@ int *pcbTime, struct forThread *arrayPrt
           cyT = ((*current)->cycleTime);
           
           // this method knows how to treat that process
-          test = startAction(comL,opStr,&cyT,proT,iOT,time,count,printType,
+          test = startAction(comL,opStr,&((*current)->cycleTime),proT,iOT,time,count,printType,
                            numberArraySize,printingLine,numberArray,currentLN,configData,pcbTime
-                           ,arrayPrt);
+                           ,arrayPrt, numOfProcess);
           
           if(test == qtTimedOut)
           {
@@ -578,6 +578,16 @@ int *pcbTime, struct forThread *arrayPrt
              *current = (*current)->nextNode;
              **first = **current;
              return setToBlocked;
+          }
+          else if( test == waitQueueSignal)
+          {
+             processesWaiting = countWaitQueue(arrayPrt, numOfProcess);
+
+
+
+          //   *current = (*current)->nextNode;
+          //   **first = **current;
+          //   return setToBlocked;
           }
           else
           {
@@ -597,7 +607,8 @@ int startAction
 (
 char comL,char *opStr,int *cyT,int proT,int iOT,double *time,int count, int printType,
 int numberArraySize, char *printingLine, char *numberArray, struct logNode **currentLN,
-struct configStruct configData, int *pcbTime, struct forThread *arrayPrt
+struct configStruct configData, int *pcbTime, struct forThread *arrayPrt,
+int numOfProcess
 )
   {
      clock_t startTime, endTime;
@@ -605,7 +616,7 @@ struct configStruct configData, int *pcbTime, struct forThread *arrayPrt
      pthread_attr_t attr;
      pthread_attr_init(&attr);
      char printArray[80];
-     int printArraySize = 80;
+     int printArraySize = 80, test = 0;
      int threadTime;
      struct forThread *threadData = (struct forThread*)malloc (sizeof(struct forThread));
 
@@ -674,12 +685,12 @@ struct configStruct configData, int *pcbTime, struct forThread *arrayPrt
          *time += ((*cyT)*iOT);
          if(printType == printTM || printType == printB)
            {  
-            printf("\nTime: %.6lf, Process %d, ",*time/CLOCKS_PER_SEC,count);   
-            printf("%s output end",opStr);
+        //    printf("\nTime: %.6lf, Process %d, ",*time/CLOCKS_PER_SEC,count);   
+        //    printf("%s output end",opStr);
            }
 
           //====this statement adds to the logNode memory info ================
-          sprintf(printArray,"\nTime: %.6lf, Process %d, %s output end",*time/CLOCKS_PER_SEC,count,opStr);
+          sprintf(printArray,"\nProcess %d, %s output end",count,opStr);
           strcat(printingLine, printArray);
           clean(printArray,printArraySize);
           strcpy((*currentLN)->data,printingLine);
@@ -762,6 +773,7 @@ struct configStruct configData, int *pcbTime, struct forThread *arrayPrt
      // if the component Letter is a P, process, do this
      if(comL =='P')
        {
+         int loopCount = 0, count = 0;
          endTime = clock();
          *time += (endTime - startTime);
 
@@ -788,6 +800,70 @@ struct configStruct configData, int *pcbTime, struct forThread *arrayPrt
          *time += ((*cyT)*proT);
 
 
+         /*
+get the number of cycles in refrence to qTime and cycle time of this operation
+
+EX: qtime = 30
+    P(run)7, thus operation is 70 if the process cycle time in the config is 10
+
+so at  60, 50, and 40 i need to check if a returning process.
+
+ok known   qtime, cycletime*configData.process
+
+i need to compute num of cycles looks, the 60, 50, 40
+
+so...   
+
+...
+qtime/config.processCT
+
+
+30/10 = 3
+
+
+a cycle is 
+*/
+         loopCount = configData.quantumTimeData/configData.processorCycleTimeData;
+ 
+         for(count = 0; count < loopCount; count++)
+           {
+             // do the wait a cycle
+             myWait(configData.processorCycleTimeData*1000);
+             // update the time, P(run) 7 to 6
+             *cyT = *cyT - 1;
+             *pcbTime -= configData.processorCycleTimeData;
+             *time += configData.processorCycleTimeData;
+             // do the check
+             test = countWaitQueue(arrayPrt, numOfProcess);
+             // if true, leave with updating data
+             if(test != 0)
+               { 
+                 test = 0;
+                 if(printType == printTM || printType == printB)
+                  {  
+                   printf("\nTime: %.6lf, Process %d, ",*time/CLOCKS_PER_SEC,count);
+                   printf("Run operation end");
+                   printf("\n\n (%d)  (%d) (%d) \n\n",loopCount,*cyT,count);
+                  }
+                 //====this statement adds to the logNode memory info ================
+                 sprintf(printArray,"\nTime: %.6lf, Process %d, Run operation end",*time/            CLOCKS_PER_SEC,count);
+                 strcat(printingLine, printArray);
+                 clean(printArray,printArraySize);
+                 strcpy((*currentLN)->data,printingLine);
+                 *currentLN = addLogNode(*currentLN);
+                 clean(printingLine,printArraySize);
+                 // ==================================================================
+               
+                 return waitQueueSignal;
+               }
+             
+             // false, continue.
+           }
+
+
+
+
+/*
          if((*cyT)* (proT/1000) > configData.quantumTimeData)
          {
 
@@ -811,7 +887,7 @@ struct configStruct configData, int *pcbTime, struct forThread *arrayPrt
             *pcbTime -= (*cyT)*proT/1000;
 
          }
-
+*/
 
 
          if(printType == printTM || printType == printB)
@@ -1049,11 +1125,15 @@ void unblockProcess(struct pcb array[], int index, int subTime)
     clean(array[index].state, 7);
     strcpy(array[index].state, "ready");
     array[index].time -= subTime; 
+    // need to reset the process in the wait queue to null
   }
 
-
-
-
+void setIndexToNull (struct forThread *data, int index)
+  {
+     struct forThread dummieData;
+     dummieData.processID = NULL_PROCESS_ID;
+     data[index] = dummieData;
+  }
 
 
 

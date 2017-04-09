@@ -3,7 +3,7 @@ S(start)0; A(start)0;
 O(hard drive)27; I(printer)50; I(hard drive)15; P(run)10; 
   A(end)0;
 A(start)0; 
- I(printer)50; O(hard drive)27; I(hard drive)15; P(run)10; 
+ I(printer)50; I(hard drive)15;I(hard drive)15;I(hard drive)15;O(hard drive)27; P(run)10; 
   A(end)0;
 
 S(end)0.
