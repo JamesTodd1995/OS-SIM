@@ -1,4 +1,4 @@
-// Main Program Header ////
+// Main Program Header Information////
 /**
   * @file mainprog.h
   *
