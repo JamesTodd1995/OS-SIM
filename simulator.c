@@ -16,7 +16,9 @@
   *          These operations could be further abstracted, but would require 
   *          many different helper methods, making for a *different* kind of redundancy
   *          instead of eliminating redundancy all together. 
+  *          Other operations that need special context are made in a similar style.
   *
+  * @note To Self: Look at OpenMP and MPI libraries
   */
 
 #include "simulator.h" 
@@ -175,33 +177,26 @@ int startSim(struct Node *metaD,struct configStruct configData)
      // ==================================================================
 
 
-     // at this point all processes have been made and put in to pcb.
-     // all pcb are set to ready
-     // this while loop will run the processes.
-     //
-     // step one get an index for a pcb
-     //      this is based off of the scheduleing algorithem in the config file
-     //      once an index is found get that pcb ready for running
-     //          NOTE  this is where we might want to have the OS wait if all processes are in blocked state.
-     //
-     // step two put the selected pcb in runner state and run it
-     //       in the running state this is where all of the magic happens
-     //       this is also where the we need to edit/add to our program to finish sim04.  there are other places where code is needed but this is the main place.
-     //       there are two main funcitons for this step:  readProcess  and  startAction
-     //       
-     //              readProcess takes in the selected PCB, and much much more, and reads the op commands from it.
-     //                once a an op command is ready to run then readProess calls startAction
-     //
-     //              startAction takes the needed infomation about an op command and deals with that command.
-     //                 here is where we need to add code for each section.
+     /** At this point, all processes have been constructed and are set to ready.
+       * The processes will run in a while loop until there are no more to run.
 
-     
+       * Step one get an index for a pcb, based off of the scheduleing algorithm in the config file.
+       * Once an index is found, get that pcb ready for running.
+       * NOTE  this is where we might want to have the OS wait if all processes are in blocked state.
+
+       * Step two put the selected pcb in running state and run it.
+       * This is most of the additions to our program to complere sim04. 
+       *      there are two main funcitons for this step: readProcess and startAction.
+       *           readProcess takes in the selected PCB, parameters, and reads the op commands.
+       *           once a an op command is ready to run, readProess calls startAction.
+       *           startAction reads an op command and responds accordingly.
+       */
+
      while(processCounter != numberOfProcess)
        {
           // take a process and set it to running
           // then Run that process
           startTime = clock();
-           
 
           //     ================   Step one  ====================
           // here i will be picking a process to run with regard to the
@@ -231,7 +226,6 @@ int startSim(struct Node *metaD,struct configStruct configData)
           strcpy(currentLN->data,printingLine);
           currentLN = addLogNode(currentLN);
           clean(printingLine,printArraySize);
-          // ==================================================================
 
 
           // ================ End of Step one =================================
@@ -262,9 +256,6 @@ int startSim(struct Node *metaD,struct configStruct configData)
 
 
 
-
-
-
           // read the process now. aka running
           test = readProcess(&(processes[index].first),configData , &time, index,
                              howToPrint, numberArraySize,printingLine,numberArray,
@@ -272,22 +263,20 @@ int startSim(struct Node *metaD,struct configStruct configData)
                              numberOfProcess, arrayPrt);
           if(test == setToBlocked)
             {
-              clean(processes[index].state, 7);
-              strcpy(processes[index].state, "block");
-              printf("\nTime: %.6lf, Process %d is in Blocked state", time/CLOCKS_PER_SEC,index);
-              test = 0;
+               clean(processes[index].state, 7);
+               strcpy(processes[index].state, "block");
+               printf("\nTime: %.6lf, Process %d is in Blocked state", time/CLOCKS_PER_SEC,index);
+               test = 0;
 
 
-          //====this statement adds to the logNode memory info ================
-          sprintf(printArray,"\nTime: %.6lf, Process %d is in Blocked state",time/CLOCKS_PER_SEC,index);
-          strcat(printingLine, printArray);
-          clean(printArray,printArraySize);
-          strcpy(currentLN->data,printingLine);
-          currentLN = addLogNode(currentLN);
-          clean(printingLine,printArraySize);
-          // ==================================================================
-
-
+               //====this statement adds to the logNode memory info ================
+               sprintf(printArray,"\nTime: %.6lf, Process %d is in Blocked state",time/CLOCKS_PER_SEC,index);
+               strcat(printingLine, printArray);
+               clean(printArray,printArraySize);
+               strcpy(currentLN->data,printingLine);
+               currentLN = addLogNode(currentLN);
+               clean(printingLine,printArraySize);
+               // ==================================================================
 
 
             }
@@ -379,9 +368,6 @@ myWait(1000000);
      return 0;
 
   }
-
-
-
 
 
 // this method looks at the element of the meta data
@@ -537,7 +523,6 @@ void setProcessesReady(struct pcb *process, int numOfProcess)
 
 
 
-
 int readProcess
 (
 struct Node **first,struct configStruct configData, double *time, int count,int printType,
@@ -616,10 +601,9 @@ int *pcbTime, struct forThread *arrayPrt, int numOfProcess, struct pcb *pcbArray
 // this method knows how to treat a specific action of a process
 int startAction
 (
-char comL,char *opStr,int *cyT,int proT,int iOT,double *time,int count, int printType,
-int numberArraySize, char *printingLine, char *numberArray, struct logNode **currentLN,
-struct configStruct configData, int *pcbTime, struct forThread *arrayPrt,
-int numOfProcess
+     char comL, char *opStr, int *cyT, int proT, int iOT, double *time, int count, int printType,
+     int numberArraySize, char *printingLine, char *numberArray, struct logNode **currentLN,
+     struct configStruct configData, int *pcbTime, struct forThread *arrayPrt,int numOfProcess
 )
   {
      clock_t startTime, endTime;
@@ -749,30 +733,26 @@ int numOfProcess
           clean(printArray,printArraySize);
           strcpy((*currentLN)->data,printingLine);
           *currentLN = addLogNode(*currentLN);
-  //        clean(printingLine,printArraySize);
+          // clean(printingLine,printArraySize);
           // ==================================================================
 
   
-       threadTime = (int)((*cyT)*iOT);
-
-//this is :    I
+          threadTime = (int)((*cyT)*iOT);
 
 
-        threadData->processID = count;
-        threadData->processWaitTime = threadTime;
-        clean(threadData->printLine,80);
-        strcpy(threadData->printLine,printingLine);
-        threadData->waitPrt = arrayPrt;
-        threadData->howToPrint = printType;
 
+          threadData->processID = count;
+          threadData->processWaitTime = threadTime;
+          clean(threadData->printLine,80);
+          strcpy(threadData->printLine,printingLine);
+          threadData->waitPrt = arrayPrt;
+          threadData->howToPrint = printType;
 
-        clean(printingLine,printArraySize);
+          clean(printingLine,printArraySize);
         
+          pthread_create(&thread, &attr, myTWait,(void *)threadData);
 
-         pthread_create(&thread, &attr, myTWait,(void *)threadData);
-
-         return setToBlocked;
-
+          return setToBlocked;
 
        }
      // if the component Letter is a P, process, do this
@@ -799,8 +779,6 @@ int numOfProcess
           // ==================================================================
 
 
-
-
   
          *time += ((*cyT)*proT);
 
@@ -811,7 +789,6 @@ int numOfProcess
            {
              loopCount = *cyT;
            }
-
 
 
          for(counter = 0; counter < loopCount; counter++)
@@ -1145,17 +1122,4 @@ void setIndexToNull (struct forThread *data, int index)
      dummieData.processID = NULL_PROCESS_ID;
      data[index] = dummieData;
   }
-
-
-
-
-
-// openmp ,, mpi
-
-
-
-
-
-
-
 
