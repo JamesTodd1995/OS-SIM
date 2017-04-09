@@ -519,10 +519,7 @@ void setProcessesReady(struct pcb *process, int numOfProcess)
        }
   }
 
-// this method reads though a process
-
-
-
+// this method reads in a process by its parameters and performs according to simulated properties.
 int readProcess
 (
 struct Node **first,struct configStruct configData, double *time, int count,int printType,
@@ -740,7 +737,6 @@ int startAction
           threadTime = (int)((*cyT)*iOT);
 
 
-
           threadData->processID = count;
           threadData->processWaitTime = threadTime;
           clean(threadData->printLine,80);
@@ -778,10 +774,8 @@ int startAction
           clean(printingLine,printArraySize);
           // ==================================================================
 
-
   
          *time += ((*cyT)*proT);
-
 
          loopCount = configData.quantumTimeData/configData.processorCycleTimeData;
         
@@ -789,7 +783,6 @@ int startAction
            {
              loopCount = *cyT;
            }
-
 
          for(counter = 0; counter < loopCount; counter++)
            {
@@ -953,7 +946,7 @@ struct forThread *data
   }
   
 
-// this method returns the index of the process with FCFS-N in mind
+// this method returns the index of the process with respect to FCFS-N order
 int getFCFSN(struct pcb array[], int size)
   {
    int count = 0;
@@ -978,6 +971,7 @@ int getFCFSN(struct pcb array[], int size)
    return allBlocked;
   }
 
+// this method returns the index of the process with respect to FCFS-P order
 int getFCFSP(struct pcb array[], int size)
   {
      int count = 0, index = -1;
@@ -1015,29 +1009,34 @@ int getFCFSP(struct pcb array[], int size)
        }
   }
 
-// this method returns the index of the process with SJF-N in mind.
+// this method returns the index of the process with respect to SJF-N order.
 int getSJFN(struct pcb array[], int size)
   {
-   // the min time is unknow, so i picked 5,000,000 to be the stating min
-   // because i know no processes will be longer than that.
-   int min = 5000000, index = 0, count;
+     // the min time is unknow, so i picked 5,000,000 to be the stating min
+     // because i know no processes will be longer than that.
+     int min = 5000000, index = 0, count;
    
-   for(count = 0; count < size; count++)
-     {
-      if((strcmp((array[count].state), "exit")) != 0 &&
-          (strcmp((array[count].state), "block")) != 0)
-      {
-        if(array[count].time < min)
-        {
-           min = array[count].time;
-           index = count;
-        }
-      }
-     }
-   return allBlocked;
+     for(count = 0; count < size; count++)
+       {
+          if((strcmp((array[count].state), "exit")) != 0 &&
+            (strcmp((array[count].state), "block")) != 0)
+            {
+               if(array[count].time < min)
+                 {
+                    min = array[count].time;
+                    index = count;
+                 }
+            }
+       }
+     return allBlocked;
   }
 
-
+// this method returns the index of the process with respect to RR-P order
+int getRRP(Struct pcb array[], int size)
+  {
+     return allBlocked;
+  }
+    
 void threadHandler (struct forThread *data)
   {
    static int lock  = isUnlock;
