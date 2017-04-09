@@ -6,6 +6,7 @@
 
 void myWait(clock_t target);
 void *myTWait ( void *myvar);
+void *myTWait2 ( void *myvar);
 
 #endif
 

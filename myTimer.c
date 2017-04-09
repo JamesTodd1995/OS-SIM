@@ -35,19 +35,37 @@ void myWait(clock_t target)
 
 void *myTWait ( void *myvar)
   {
-   
+   static int tester = 0;
    struct forThread *data = (struct forThread*)myvar;
    int target = data->processWaitTime;
    clock_t currentTime = clock();
    clock_t goalTime = clock();
 
-
+   printf("\n\n (%d) (%s) \n\n",tester++, data->printLine);
    while(currentTime <= (goalTime + target))
      {
 
         currentTime = clock();
      }
-  threadHandler(data);
+   threadHandler(data);
    
+   return NULL;
+  }
+
+void *myTWait2 ( void *myvar)
+  {
+ 
+   struct forThread *data = (struct forThread*)myvar;
+   int target = data->processWaitTime;
+   clock_t currentTime = clock();
+   clock_t goalTime = clock();
+
+  
+   while(currentTime <= (goalTime + target))
+     {
+
+        currentTime = clock();
+     }
+  
    return NULL;
   }

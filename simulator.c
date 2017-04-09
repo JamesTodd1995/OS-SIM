@@ -300,7 +300,7 @@ int startSim(struct Node *metaD,struct configStruct configData)
           {
              clean(processes[index].state, 7);
              strcpy(processes[index].state, "ready"); 
-   printf("\n\n\n am i here!?");
+
 
              if(howToPrint == printTM || howToPrint == printB)
                {
@@ -308,7 +308,7 @@ int startSim(struct Node *metaD,struct configStruct configData)
                  printf("set in Ready State"); 
                }
           }
-          else if((strcmp((processes[index].state), "block")) != 0)
+          else if(processes[index].time <= 0 )
           {  
              processCounter++;
              clean(processes[index].state, 7);
@@ -751,7 +751,7 @@ struct configStruct configData, int *pcbTime, struct forThread *arrayPrt
         threadData->waitPrt = arrayPrt;
         threadData->howToPrint = printType;
 
-        pthread_create(&thread, &attr, myTWait,(void *)threadData);
+        pthread_create(&thread, &attr, myTWait2,(void *)threadData);
         pthread_join(thread,NULL);
         *pcbTime -= threadTime/1000;
         clean(printingLine,printArraySize);
@@ -864,10 +864,14 @@ void writeToLog (struct logNode *first, struct configStruct configData)
 // how this works is I check to see what algorithem is in config file
 // then i will pass my pcb array in the right function to get the index of the next process
 // all scheduling algorithems ignore PCB in exit state.S
-int pickProcess(struct pcb array[], struct configStruct configData, int size, struct forThread *data)
+int pickProcess
+(
+struct pcb array[], struct configStruct configData, int size,
+struct forThread *data
+)
   {
    int scheduling = 0, fcfsn = 1000, sjfn = 2000, fcfsp = 3000;
-   int index = 0, test; 
+   int index = 0, test, subTime = 0; 
   
    if((strcmp(configData.cpuSchedulingCodeData, "FCFS-N")) == 0) 
      {   
@@ -900,8 +904,14 @@ int pickProcess(struct pcb array[], struct configStruct configData, int size, st
         while(index == allBlocked)
           {
             printf("\n all processes are blocked");
-            test = countWaitQueue(data,size);
             myWait(1000000);
+            test = countWaitQueue(data,size);
+            if(test != -1)
+              { 
+                subTime = data[test].processWaitTime/1000;
+                unblockProcess(array,test,subTime);
+                index = 0;
+              }
           }
         
         pickProcess(array,configData,size,data);
@@ -1032,6 +1042,14 @@ int countWaitQueue(struct forThread *data, int size)
   }
 
 
+
+void unblockProcess(struct pcb array[], int index, int subTime)
+  {
+    printf("\n\n Process (%d) is set to ready",index);
+    clean(array[index].state, 7);
+    strcpy(array[index].state, "ready");
+    array[index].time -= subTime; 
+  }
 
 
 

@@ -60,7 +60,11 @@ struct configStruct configData, int *pcbTime, struct forThread *arrayPrt
 );
 
 
-int pickProcess(struct pcb array[], struct configStruct configData, int size, struct forThread *data);
+int pickProcess
+(
+struct pcb array[], struct configStruct configData, int size,
+struct forThread *data
+);
 struct logNode *addLogNode(struct logNode *current);
 void writeToLog (struct logNode *first,struct configStruct configData);
 
@@ -70,6 +74,7 @@ int getFCFSP(struct pcb array[], int size);
 void threadHandler(struct forThread *data);
 void setToNull(struct forThread *data, int size);
 int countWaitQueue(struct forThread *data, int size);
+void unblockProcess(struct pcb array[], int index, int subTime);
 
 #endif
 
