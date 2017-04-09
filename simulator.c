@@ -289,7 +289,7 @@ int startSim(struct Node *metaD,struct configStruct configData)
             {
               clean(processes[index].state, 7);
               strcpy(processes[index].state, "block");
-              printf("\nprocess %d is now blocked", index);
+              printf("\nTime: %.6lf, Process %d is in Blocked state", time,index);
               test = 0;
             }
 
@@ -549,7 +549,7 @@ int *pcbTime, struct forThread *arrayPrt, int numOfProcess, struct pcb *pcbArray
      // set up needed variables
      struct Node **current = first;
      char comL, opStr[12];
-     int  cyT = 0, proT = configData.processorCycleTimeData;
+     int  proT = configData.processorCycleTimeData;
      int  iOT = configData.ioCycleTimeData;
      int test, processesWaiting, loopCount = 0;
      
@@ -565,7 +565,7 @@ int *pcbTime, struct forThread *arrayPrt, int numOfProcess, struct pcb *pcbArray
           // get the data of the process
           comL= (*current)->componentLetter;
           strcpy(opStr, (*current)->oprationString);
-          cyT = ((*current)->cycleTime);
+          
           
           // this method knows how to treat that process
           test = startAction(comL,opStr,&((*current)->cycleTime),proT,iOT,time,count,printType,
@@ -595,9 +595,11 @@ int *pcbTime, struct forThread *arrayPrt, int numOfProcess, struct pcb *pcbArray
              **first = **current;
              return qtTimedOut;
           }
-          else
+          else if(test == memoryTimeOut)
           {
              *current = (*current)->nextNode;
+             **first = **current;  
+             return qtTimedOut;
           }
           // move the pointer
           
@@ -666,6 +668,7 @@ int numOfProcess
           clean(printingLine,printArraySize);
           // ==================================================================
           myWait((*cyT));
+          return memoryTimeOut;
        }
 
      // if the component Letter is a O, output, do this
@@ -689,11 +692,7 @@ int numOfProcess
           // ==================================================================
         
          *time += ((*cyT)*iOT);
-         if(printType == printTM || printType == printB)
-           {  
-        //    printf("\nTime: %.6lf, Process %d, ",*time/CLOCKS_PER_SEC,count);   
-        //    printf("%s output end",opStr);
-           }
+
 
           //====this statement adds to the logNode memory info ================
           sprintf(printArray,"\nProcess %d, %s output end",count,opStr);
@@ -701,7 +700,7 @@ int numOfProcess
           clean(printArray,printArraySize);
           strcpy((*currentLN)->data,printingLine);
           *currentLN = addLogNode(*currentLN);
-        //  clean(printingLine,printArraySize);
+  
           // ==================================================================
 
          threadTime = (int)((*cyT)*iOT);
@@ -715,8 +714,7 @@ int numOfProcess
 
          clean(printingLine,printArraySize);
          pthread_create(&thread, &attr, myTWait,(void *)threadData);
-         //pthread_join(thread,NULL);
-         //*pcbTime -= threadTime/1000;
+
          return setToBlocked;
        }
      // if the component Letter is a I, input, do this
@@ -725,12 +723,12 @@ int numOfProcess
          endTime = clock();
          *time += (endTime - startTime);
 
+
          if(printType == printTM || printType == printB)
            {
-            printf("\nTime: %.6lf, Process %d, ",*time/CLOCKS_PER_SEC,count);
-            printf("%s intput start",opStr);
+            printf("\nTime: %.6lf, Process %d, %s intput start",*time/CLOCKS_PER_SEC,count,opStr);
+            
            }
-
           //====this statement adds to the logNode memory info ================
           sprintf(printArray,"\nTime: %.6lf, Process %d, %s intput start",*time/CLOCKS_PER_SEC,count,opStr);
           strcat(printingLine, printArray);
@@ -741,13 +739,9 @@ int numOfProcess
           // ==================================================================
 
          *time += ((*cyT)*iOT);
-         if(printType == printTM || printType == printB)
-           {
-            printf("\nTime: %.6lf, Process %d, ",*time/CLOCKS_PER_SEC,count);
-            printf("%s intput end",opStr);
-           }
+
           //====this statement adds to the logNode memory info ================
-          sprintf(printArray,"\nTime: %.6lf, Process %d, %s intput end",*time/CLOCKS_PER_SEC,count,opStr);
+          sprintf(printArray,"Process %d, %s intput end",count,opStr);
           strcat(printingLine, printArray);
           clean(printArray,printArraySize);
           strcpy((*currentLN)->data,printingLine);
