@@ -1034,7 +1034,26 @@ int getSJFN(struct pcb array[], int size)
 // this method returns the index of the process with respect to RR-P order
 int getRRP(Struct pcb array[], int size)
   {
-     
+     int count = 0;
+     static int lastIndex = -1;
+     for(count = 0; count < size; count++)
+       {
+          if((strcmp((array[count].state), "exit")) != 0 &&
+            (strcmp((array[count].state), "block")) != 0 &&
+            (count > lastIndex))
+            {
+               if((count+1) == size)
+                 {
+                    lastIndex = -1;
+                 }
+               else
+                 {
+                    lastIndex = count;
+                 }
+               return count;
+            }
+          // IF state is block, then add to back of queue?
+       }
      return allBlocked;
   }
     
