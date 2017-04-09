@@ -615,6 +615,10 @@ int *pcbTime, struct forThread *arrayPrt, int numOfProcess, struct pcb *pcbArray
              **first = **current;  
              return qtTimedOut;
           }
+          else
+          {
+            *current = (*current)->nextNode;
+          }
           // move the pointer
           
           
@@ -842,7 +846,7 @@ int numOfProcess
                  test = 0;
                  if(printType == printTM || printType == printB)
                   {  
-                   printf("\nTime: %.6lf, Process %d, ",*time/CLOCKS_PER_SEC,count);
+                   printf("\nTime: %.6lf, Process (here) %d, ",*time/CLOCKS_PER_SEC,count);
                    printf("Run operation end");
                   }
                  //====this statement adds to the logNode memory info ================
@@ -862,9 +866,9 @@ int numOfProcess
 
          if(printType == printTM || printType == printB)
            {  
-            printf("\nTime: %.6lf, Process %d, ",*time/CLOCKS_PER_SEC,count);
+            printf("\nTime: %.6lf, Process (herre2) %d, ",*time/CLOCKS_PER_SEC,count);
             printf("Run operation end");
-
+printf("\n\n (%d) \n\n %d \n\n",*cyT, *pcbTime);
            }
           //====this statement adds to the logNode memory info ================
           sprintf(printArray,"\nTime: %.6lf, Process %d, Run operation end",*time/CLOCKS_PER_SEC,count);
