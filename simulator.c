@@ -1012,7 +1012,7 @@ int getFCFSP(struct pcb array[], int size)
 // this method returns the index of the process with respect to SJF-N order.
 int getSJFN(struct pcb array[], int size)
   {
-     // the min time is unknow, so i picked 5,000,000 to be the stating min
+     // the min time is unknow, so i picked 5,000,000 to be the starting min
      // because i know no processes will be longer than that.
      int min = 5000000, index = 0, count;
    
@@ -1034,6 +1034,7 @@ int getSJFN(struct pcb array[], int size)
 // this method returns the index of the process with respect to RR-P order
 int getRRP(Struct pcb array[], int size)
   {
+     
      return allBlocked;
   }
     
