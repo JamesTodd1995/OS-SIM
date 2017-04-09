@@ -5,7 +5,7 @@ CPU Scheduling Code: FCFS-P
 Quantum Time (cycles): 99
 Memory Available (KB): 667
 Processor Cycle Time (msec): 10
-I/O Cycle Time (msec): 20
+I/O Cycle Time (msec): 10
 Log To: Both
 Log File Path: logTest3.lgf
 End Simulator Configuration File.

@@ -33,7 +33,7 @@ struct forThread
 
 enum massage_codes { unk = -1000, printTM, printTL, printB, qtTimedOut,
                      commandEnded, setToBlocked, isLock, isUnlock, allBlocked,
-                     notAllBlocked, NULL_PROCESS_ID, waitQueueSignal};
+                     notAllBlocked, NULL_PROCESS_ID, waitQueueSignal, allExit};
 
 
 
