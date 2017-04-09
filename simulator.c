@@ -289,8 +289,22 @@ int startSim(struct Node *metaD,struct configStruct configData)
             {
               clean(processes[index].state, 7);
               strcpy(processes[index].state, "block");
-              printf("\nTime: %.6lf, Process %d is in Blocked state", time,index);
+              printf("\nTime: %.6lf, Process %d is in Blocked state", time/CLOCKS_PER_SEC,index);
               test = 0;
+
+
+          //====this statement adds to the logNode memory info ================
+          sprintf(printArray,"\nTime: %.6lf, Process %d is in Blocked state",time/CLOCKS_PER_SEC,index);
+          strcat(printingLine, printArray);
+          clean(printArray,printArraySize);
+          strcpy(currentLN->data,printingLine);
+          currentLN = addLogNode(currentLN);
+          clean(printingLine,printArraySize);
+          // ==================================================================
+
+
+
+
             }
 
           // set the finished process to an exit state
@@ -343,7 +357,7 @@ int startSim(struct Node *metaD,struct configStruct configData)
           
           // =================== End of Step 3 ================================
           startTime = clock();
-myWait(100000);
+myWait(1000000);
        }
      endTime = clock();
      time+= (endTime - startTime);
@@ -560,7 +574,7 @@ int *pcbTime, struct forThread *arrayPrt, int numOfProcess, struct pcb *pcbArray
      iOT = iOT*1000;
      
      // read though the process data a deal with a specific part of the process.
-     while(*current != NULL)
+     while((*current)->nextNode != NULL)
        {
           // get the data of the process
           comL= (*current)->componentLetter;
@@ -1021,11 +1035,11 @@ int getFCFSP(struct pcb array[], int size)
           }
        }
 
-     if(isExit == (size - 1))
+     if(isExit == (size))
        {
           return allExit;
        }
-     else if(isBlocked == (size - 1) || (isBlocked + isExit) == (size - 1))
+     else if(isBlocked == (size) || (isBlocked + isExit) == (size))
        {
           return allBlocked;
        }
