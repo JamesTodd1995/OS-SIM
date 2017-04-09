@@ -1,41 +1,30 @@
+// Simulator Program Information
+/**
+  * @file simulator.c
+  * 
+  * @brief The workhorse program for mainprog.c
+  * 
+  * @details startSim reads metadata file and extracts process info from it.
+  *          Once processes are constructed, Simulator reads throught them 
+  *          in the order that the config file defines.
+  * 
+  * @note To understand the use of clock_t variables, please see myTimer.c.
+  * 
+  * @note Writing log files was difficult. You will see comments such as:
+  *          //====this statement adds to the logNode memory info============
+  *          This is to provide special context to these difficult operations.
+  *          These operations could be further abstracted, but would require 
+  *          many different helper methods, making for a *different* kind of redundancy
+  *          instead of eliminating redundancy all together. 
+  *
+  */
+
 #include "simulator.h" 
 
-
-/*
- * method startSim will read though the meta data file and get the processes from it
- * once process are made the Simulator will read though the processes
- * in the order that the config data states to.
- */
-
-
-/*
- * to understand the use of clock_t variables, please look at myTimer.c
- */
-
-
-/*
- * writing to a log file was hard to do.
- * when code comments such as:
-
-     //====this statement adds to the logNode memory info ================
-     sprintf(printArray,"Time: %.6lf, OS: System start",time/CLOCKS_PER_SEC);
-     strcat(printingLine, printArray);numberArray
-     clean(printArray,printArraySize);
-     strcpy(currentLN->data,printingLine);
-     currentLN = addLogNode(currentLN);  
-     clean(printingLine,printArraySize);
-     // ==================================================================
-
- * pop up i am writing that infomation to a log link list
- * so i can write it to a file when the sim is done.
- *
- * also i did not make methods to do this for me because i thought it would
- * be redundent to do so because i would need 3 diffrent methods to
- */
 int startSim(struct Node *metaD,struct configStruct configData)
   {
 
-     // a list of variables needed for the simulator to work
+     // a list of variables needed for the simulator to work in different modes
      double time = 0;
      char printingLine[80];
      char numberArray[12];
@@ -53,7 +42,8 @@ int startSim(struct Node *metaD,struct configStruct configData)
      struct logNode *currentLN = ln;
 
      clean(printingLine,printingLineSize);
-      
+
+     //read config data and establish which logging mode to use (monitor, file, or both)      
      if((strcmp(configData.logToData, "Monitor")) == 0) 
        {   
          howToPrint = printTM;
@@ -103,9 +93,7 @@ int startSim(struct Node *metaD,struct configStruct configData)
        }
      endTime = clock();
 
-
      time += ((double) (endTime-startTime));   
-
 
 
      if(howToPrint == printTM || howToPrint == printB)
@@ -121,7 +109,6 @@ int startSim(struct Node *metaD,struct configStruct configData)
      currentLN = addLogNode(currentLN);  
      clean(printingLine,printArraySize);
      // ==================================================================
-
 
 
      // get the number of processes within the meta data     
@@ -163,8 +150,6 @@ int startSim(struct Node *metaD,struct configStruct configData)
      currentLN = addLogNode(currentLN);  
      clean(printingLine,printArraySize);
      // ==================================================================
-
-
 
 
      // set all processes to a ready state.
