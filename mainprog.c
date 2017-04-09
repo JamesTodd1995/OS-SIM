@@ -1,3 +1,9 @@
+// Main Program Imformation ////
+/**
+  * @file mainprog.c
+  *
+  * @brief Main driver that runs operations defined in helper classes and highest level logic/control
+  */
 
 #include"mainprog.h"
 
@@ -30,7 +36,6 @@ int main(int argc, char *argv[])
      configData = parConfigFile(fPrt);
      fclose(fPrt);
      // end of parsing though the config file
-
 
 
      // start of parsing though the meta data file
@@ -72,7 +77,6 @@ void doesFileExist(char* fileName)
        }
   }
 
-
 void printConfigData(struct configStruct *configData)
   {
    printf("\nVersion/Phase: %d",configData->versionData);
@@ -85,7 +89,4 @@ void printConfigData(struct configStruct *configData)
    printf("\nLog To: %s",configData->logToData);
    printf("\nLog File Path: %s\n",configData->logFilePathData);
   }
-
-
-
    
