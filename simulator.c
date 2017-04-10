@@ -882,66 +882,70 @@ struct pcb array[], struct configStruct configData, int size,
 struct forThread *data
 )
   {
-   int scheduling = 0, fcfsn = 1000, sjfn = 2000, fcfsp = 3000;
-   int index = 0, test, subTime = 0, loopCounter = 0;
-   int processIndex = 0;
+     int scheduling = 0, fcfsn = 1000, sjfn = 2000, fcfsp = 3000, rrp = 4000;
+     int index = 0, test, subTime = 0, loopCounter = 0;
+     int processIndex = 0;
   
-   if((strcmp(configData.cpuSchedulingCodeData, "FCFS-N")) == 0) 
-     {   
-       scheduling = fcfsn;
-     }
-   if((strcmp(configData.cpuSchedulingCodeData, "SJF-N")) == 0) 
-     {   
-       scheduling = sjfn;
-     }
-   if((strcmp(configData.cpuSchedulingCodeData, "FCFS-P")) == 0) 
-     {   
-       scheduling = fcfsp;
-     }
+     if((strcmp(configData.cpuSchedulingCodeData, "FCFS-N")) == 0) 
+       {   
+         scheduling = fcfsn;
+       }
+     if((strcmp(configData.cpuSchedulingCodeData, "SJF-N")) == 0) 
+       {   
+         scheduling = sjfn;
+       }
+     if((strcmp(configData.cpuSchedulingCodeData, "FCFS-P")) == 0) 
+       {   
+         scheduling = fcfsp;
+       }
+     if((strcmp(configData.cpuSchedulingCodeData, "RR-P")) == 0) 
+       {   
+         scheduling = rrp;
+       }
 
-   switch(scheduling)
-     {
-       case (1000) :
-            index = getFCFSN(array,size);
-            break;
-       case (2000) :
-            index = getSJFN(array,size);
-            break;
-       case (3000) :
-            index = getFCFSP(array,size);
-            break;
-     }
+     switch(scheduling)
+       {
+          case (1000) :
+               index = getFCFSN(array, size);
+               break;
+          case (2000) :
+               index = getSJFN(array, size);
+               break;
+          case (3000) :
+               index = getFCFSP(array, size);
+               break;
+          case (4000) :
+               index = getRRP(array, size);
+               break;
+       }
     
     if(index == allBlocked)
       {
         while(index == allBlocked)
           {
 
-            printf("\n all processes are blocked");
-
-           myWait(1000000);
-
-            test = countWaitQueue(data,size);
-            if(test != -1)
-              {
-               for(loopCounter = 0; loopCounter < test; loopCounter++)
+              printf("\n all processes are blocked");
+              myWait(1000000);
+              test = countWaitQueue(data,size);
+              if(test != -1)
                 {
-
-                 processIndex =getNextIndexInWaitQueue(data,size);
-                 subTime = data[processIndex].processWaitTime/1000;
-                 unblockProcess(array,processIndex,subTime);
-                 setIndexToNull(data,processIndex);
+                   for(loopCounter = 0; loopCounter < test; loopCounter++)
+                     {
+                        processIndex =getNextIndexInWaitQueue(data,size);
+                        subTime = data[processIndex].processWaitTime/1000;
+                        unblockProcess(array,processIndex,subTime);
+                        setIndexToNull(data,processIndex);
+                     }
+                   index = 0;
                 }
-                index = 0;
-              }
           }
         
         pickProcess(array,configData,size,data);
       }
     else if(index == allExit)
-     {
-       return allExit;
-     }
+      {
+         return allExit;
+      }
     return index;
   }
   
@@ -1028,6 +1032,7 @@ int getSJFN(struct pcb array[], int size)
                  }
             }
        }
+     index = index + 1 - 1; // to silence warning about index being unused, even though it is being used.
      return allBlocked;
   }
 

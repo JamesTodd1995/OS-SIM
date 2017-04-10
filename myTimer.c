@@ -35,20 +35,20 @@ void myWait(clock_t target)
 
 void *myTWait ( void *myvar)
   {
-   static int tester = 0;
-   struct forThread *data = (struct forThread*)myvar;
-   int target = data->processWaitTime;
-   clock_t currentTime = clock();
-   clock_t goalTime = clock();
+     static int tester = 0;
+     struct forThread *data = (struct forThread*)myvar;
+     int target = data->processWaitTime;
+     clock_t currentTime = clock();
+     clock_t goalTime = clock();
 
-   while(currentTime <= (goalTime + target))
-     {
+     while(currentTime <= (goalTime + target))
+       {
 
-        currentTime = clock();
-     }
-   threadHandler(data);
-   
-   return NULL;
+          currentTime = clock();
+       }
+     threadHandler(data);
+     return NULL;
+     tester = tester + 1 - 1; // to silence warning about tester being unused, even though it is being used.
   }
 
 void *myTWait2 ( void *myvar)
